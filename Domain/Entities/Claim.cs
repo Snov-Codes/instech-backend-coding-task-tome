@@ -1,13 +1,9 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
-namespace Claims
+namespace Domain.Entities
 {
-    public class Claim
+    public class Claim : BaseEntity
     {
-        [JsonProperty(PropertyName = "id")]
-        public string Id { get; set; }
-        
         [JsonProperty(PropertyName = "coverId")]
         public string CoverId { get; set; }
 
