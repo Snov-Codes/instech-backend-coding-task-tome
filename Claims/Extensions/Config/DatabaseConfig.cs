@@ -1,4 +1,6 @@
-﻿using Persistance.AppSettings;
+﻿using Microsoft.EntityFrameworkCore;
+using Persistance.AppSettings;
+using Persistance.DataAccess;
 using Persistance.Interfaces;
 using Persistance.Repositories;
 

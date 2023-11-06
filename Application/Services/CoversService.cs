@@ -7,21 +7,25 @@ namespace Application.Services
     public class CoversService : ICoversService
     {
         private readonly ICoversRepository _coversRepository;
+        private readonly IAuditsRepository _auditsRepository;
 
-        public CoversService(ICoversRepository coversRepository)
+        public CoversService(ICoversRepository coversRepository, IAuditsRepository auditsRepository)
         {
             _coversRepository = coversRepository;
+            _auditsRepository = auditsRepository;
         }
 
         public async Task CreateCoverAsync(Cover cover)
         {
             cover.Premium = ComputePremium(cover.StartDate, cover.EndDate, cover.Type);
             await _coversRepository.AddItemAsync(cover);
+            await _auditsRepository.AuditCoverAsync(cover.Id, "POST");
         }
 
         public async Task DeleteCoverByIdAsync(string id)
         {
             await _coversRepository.DeleteItemAsync(id);
+            await _auditsRepository.AuditCoverAsync(id, "DELETE");
         }
 
         public async Task<Cover> GetCoverByIdAsync(string id)

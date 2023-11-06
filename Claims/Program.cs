@@ -12,6 +12,7 @@ builder.Services.AddControllers().AddJsonOptions(x =>
         x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     }
 );
+
 builder.Services.SetupCosmosDb(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
 
