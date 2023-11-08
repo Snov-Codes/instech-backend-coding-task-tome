@@ -38,9 +38,9 @@ public class CoversController : BaseController
         return HandleResult(await _coversService.GetAllCoversAsync());
     }
 
-    //[HttpPost("{startDate}/{endDate}/{coverType}")]
-    //public async Task<ActionResult> ComputePremiumAsync(DateOnly startDate, DateOnly endDate, CoverType coverType)
-    //{
-    //    return Ok(_coversService.ComputePremium(startDate, endDate, coverType));
-    //}
+    [HttpPost("{startDate}/{endDate}/{coverType}")]
+    public ActionResult ComputePremiumAsync(DateOnly startDate, DateOnly endDate, CoverType coverType)
+    {
+        return Ok(_coversService.ComputePremium(startDate, endDate, coverType));
+    }
 }
