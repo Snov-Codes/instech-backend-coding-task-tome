@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+﻿using Domain.Entities;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Claims.Tests
@@ -14,11 +16,16 @@ namespace Claims.Tests
 
             var client = application.CreateClient();
 
-            var response = await client.GetAsync("/Claims");
+            var response = await client.GetAsync("api/Claims");
 
             response.EnsureSuccessStatusCode();
 
             //TODO: Apart from ensuring 200 OK being returned, what else can be asserted?
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            var claims = JsonConvert.DeserializeObject<List<Claim>>(responseString);
+            
+            Assert.NotNull(claims);
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Services;
+﻿using Application.Core;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using Persistance.Interfaces;
 
@@ -17,30 +18,41 @@ namespace Application.Services
             _coversRepository = coversRepository;
         }
 
-        public async Task CreateClaimAsync(Claim claim)
+        public async Task<Result<Claim>> CreateClaimAsync(Claim claim)
         {
             var cover = await _coversRepository.GetItemAsync(claim.CoverId);
-            if (cover is not null)
-            {
-                await _claimsRepository.AddItemAsync(claim);
-                await _auditsRepository.AuditClaimAsync(claim.Id, "POST");
-            }
+            if (cover is null)
+                return Result<Claim>.Failure("Cover is required when creating a Claim!");
+
+            var dateOnly = DateOnly.FromDateTime(claim.Created);
+
+            if(dateOnly < cover.StartDate || dateOnly > cover.EndDate)
+                return Result<Claim>.Failure("Claim creation date must be within the Cover start and end dates!");
+            if(claim.DamageCost > 100000)
+                return Result<Claim>.Failure("The damage cost of the Claim cannot exceed 100.000!");
+
+            await _claimsRepository.AddItemAsync(claim);
+            await _auditsRepository.AuditClaimAsync(claim.Id, "POST");
+
+            return Result<Claim>.Success();
         }
 
-        public async Task DeleteClaimByIdAsync(string id)
+        public async Task<Result<Claim>> DeleteClaimByIdAsync(string id)
         {
             await _claimsRepository.DeleteItemAsync(id);
             await _auditsRepository.AuditClaimAsync(id, "DELETE");
+
+            return Result<Claim>.Success();
         }
 
-        public async Task<Claim> GetClaimByIdAsync(string id)
+        public async Task<Result<Claim>> GetClaimByIdAsync(string id)
         {
-            return await _claimsRepository.GetItemAsync(id);
+            return Result<Claim>.Success(await _claimsRepository.GetItemAsync(id));
         }
 
-        public async Task<IEnumerable<Claim>> GetAllClaimsAsync()
+        public async Task<Result<IEnumerable<Claim>>> GetAllClaimsAsync()
         {
-            return await _claimsRepository.GetItemsAsync();
+            return Result<IEnumerable<Claim>>.Success(await _claimsRepository.GetItemsAsync());
         }
     }
 }

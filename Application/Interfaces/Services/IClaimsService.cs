@@ -1,12 +1,13 @@
-﻿using Domain.Entities;
+﻿using Application.Core;
+using Domain.Entities;
 
 namespace Application.Interfaces.Services
 {
     public interface IClaimsService
     {
-        Task CreateClaimAsync(Claim claim);
-        Task DeleteClaimByIdAsync(string id);
-        Task<Claim> GetClaimByIdAsync(string id);
-        Task<IEnumerable<Claim>> GetAllClaimsAsync();
+        Task<Result<Claim>> CreateClaimAsync(Claim claim);
+        Task<Result<Claim>> DeleteClaimByIdAsync(string id);
+        Task<Result<Claim>> GetClaimByIdAsync(string id);
+        Task<Result<IEnumerable<Claim>>> GetAllClaimsAsync();
     }
 }

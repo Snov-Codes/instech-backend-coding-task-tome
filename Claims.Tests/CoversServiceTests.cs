@@ -6,8 +6,79 @@ using Xunit;
 
 namespace Claims.Tests
 {
-    public class CoversServiceTests
+    public class CoversServiceTests : IClassFixture<CoversServiceTestFixture>
     {
+        private readonly CoversService _coversService;
+        private readonly Mock<ICoversRepository> _coversRepositoryMock;
+        private readonly Mock<IAuditsRepository> _auditsRepositoryMock;
+
+        public CoversServiceTests(CoversServiceTestFixture fixture)
+        {
+            _coversRepositoryMock = fixture.CoversRepositoryMock;
+            _auditsRepositoryMock = fixture.AuditsRepositoryMock;
+            _coversService = new CoversService(_coversRepositoryMock.Object, _auditsRepositoryMock.Object);
+        }
+
+        [Fact]
+        public async Task CreateCoverAsync_WithinAYear_Success()
+        {
+            // Arrange
+
+            var cover = new Cover
+            {
+                StartDate = DateOnly.FromDateTime(DateTime.Now),
+                EndDate = DateOnly.FromDateTime(DateTime.Now.AddMonths(6)),
+                Type = CoverType.Yacht
+            };
+
+            // Act
+            var result = await _coversService.CreateCoverAsync(cover);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+        }
+
+        [Fact]
+        public async Task CreateCoverAsync_PastStartDate_Failure()
+        {
+            // Arrange
+
+            var cover = new Cover
+            {
+                StartDate = DateOnly.FromDateTime(DateTime.Now.AddMonths(-1)),
+                EndDate = DateOnly.FromDateTime(DateTime.Now.AddMonths(6)),
+                Type = CoverType.Yacht
+            };
+
+            // Act
+            var result = await _coversService.CreateCoverAsync(cover);
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Cover start date cannot be in the past!", result.Error);
+        }
+
+        [Fact]
+        public async Task CreateCoverAsync_MoreThanAYear_Failure()
+        {
+            // Arrange
+            var cover = new Cover
+            {
+                StartDate = DateOnly.FromDateTime(DateTime.Now),
+                EndDate = DateOnly.FromDateTime(DateTime.Now.AddYears(6)),
+                Type = CoverType.Yacht
+            };
+
+            // Act
+            var result = await _coversService.CreateCoverAsync(cover);
+
+            // Assert
+            Assert.False(result.IsSuccess);
+            Assert.Equal("Start and End dates of the Cover must be within a one year time span", result.Error);
+            _coversRepositoryMock.Verify(mock => mock.AddItemAsync(cover), Times.Never);
+            _auditsRepositoryMock.Verify(mock => mock.AuditCoverAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
         [Theory]
         [InlineData("2023-11-01", "2023-11-30", CoverType.Yacht, 41250)]
         [InlineData("2023-11-01", "2023-11-30", CoverType.PassengerShip, 45000)]
@@ -24,24 +95,28 @@ namespace Claims.Tests
         public void ComputePremium_CalculatesCorrectly(string startDate, string endDate, CoverType coverType, decimal expectedPremium)
         {
             // Arrange
-            var coversRepositoryMock = new Mock<ICoversRepository>();
-            var auditsRepositoryMock = new Mock<IAuditsRepository>();
-
-            coversRepositoryMock.Setup(repo => repo.AddItemAsync(It.IsAny<Cover>()))
-                .Returns(Task.CompletedTask);
-
-            auditsRepositoryMock.Setup(repo => repo.AuditCoverAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.CompletedTask);
-
-            var coversService = new CoversService(coversRepositoryMock.Object, auditsRepositoryMock.Object);
             DateOnly start = DateOnly.Parse(startDate);
             DateOnly end = DateOnly.Parse(endDate);
 
             // Act
-            decimal actualPremium = coversService.ComputePremium(start, end, coverType);
+            decimal actualPremium = _coversService.ComputePremium(start, end, coverType);
 
             // Assert
             Assert.Equal(expectedPremium, actualPremium);
         }
+    }
+
+    public class CoversServiceTestFixture : IDisposable
+    {
+        public Mock<ICoversRepository> CoversRepositoryMock { get; }
+        public Mock<IAuditsRepository> AuditsRepositoryMock { get; }
+
+        public CoversServiceTestFixture()
+        {
+            CoversRepositoryMock = new Mock<ICoversRepository>();
+            AuditsRepositoryMock = new Mock<IAuditsRepository>();
+        }
+
+        public void Dispose(){}
     }
 }

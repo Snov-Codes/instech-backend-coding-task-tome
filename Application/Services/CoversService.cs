@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Services;
+﻿using Application.Core;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using Persistance.Interfaces;
 
@@ -15,27 +16,36 @@ namespace Application.Services
             _auditsRepository = auditsRepository;
         }
 
-        public async Task CreateCoverAsync(Cover cover)
+        public async Task<Result<Cover>> CreateCoverAsync(Cover cover)
         {
+            if(!AreDatesWithinAYear(cover.StartDate, cover.EndDate))
+                return Result<Cover>.Failure("Start and End dates of the Cover must be within a one year time span");
+            if (cover.StartDate < DateOnly.FromDateTime(DateTime.Now))
+                return Result<Cover>.Failure("Cover start date cannot be in the past!");
+
             cover.Premium = ComputePremium(cover.StartDate, cover.EndDate, cover.Type);
             await _coversRepository.AddItemAsync(cover);
             await _auditsRepository.AuditCoverAsync(cover.Id, "POST");
+
+            return Result<Cover>.Success();
         }
 
-        public async Task DeleteCoverByIdAsync(string id)
+        public async Task<Result<Cover>> DeleteCoverByIdAsync(string id)
         {
             await _coversRepository.DeleteItemAsync(id);
             await _auditsRepository.AuditCoverAsync(id, "DELETE");
+
+            return Result<Cover>.Success();
         }
 
-        public async Task<Cover> GetCoverByIdAsync(string id)
+        public async Task<Result<Cover>> GetCoverByIdAsync(string id)
         {
-            return await _coversRepository.GetItemAsync(id);
+            return Result<Cover>.Success(await _coversRepository.GetItemAsync(id));
         }
 
-        public async Task<IEnumerable<Cover>> GetAllCoversAsync()
+        public async Task<Result<IEnumerable<Cover>>> GetAllCoversAsync()
         {
-            return await _coversRepository.GetItemsAsync();
+            return Result<IEnumerable<Cover>>.Success(await _coversRepository.GetItemsAsync());
         }
 
         public decimal ComputePremium(DateOnly startDate, DateOnly endDate, CoverType coverType)
@@ -89,6 +99,12 @@ namespace Application.Services
         private decimal ApplyDiscount(decimal premiumPerDay, decimal discount)
         {
             return premiumPerDay - (premiumPerDay * discount);
+        }
+
+        private bool AreDatesWithinAYear(DateOnly startDate, DateOnly endDate)
+        {
+            DateOnly oneYearLater = startDate.AddYears(1);
+            return endDate <= oneYearLater && endDate >= startDate;
         }
     }
 }

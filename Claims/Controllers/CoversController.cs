@@ -3,10 +3,7 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Claims.Controllers;
-
-[ApiController]
-[Route("[controller]")]
-public class CoversController : ControllerBase
+public class CoversController : BaseController
 {
     private readonly ILogger<CoversController> _logger;
     private readonly ICoversService _coversService;
@@ -18,33 +15,32 @@ public class CoversController : ControllerBase
     }
 
     [HttpPost]
-    public async Task CreateAsync(Cover cover)
+    public async Task<IActionResult> CreateAsync(Cover cover)
     {
-        await _coversService.CreateCoverAsync(cover);
-        //await _auditer.AuditCover(cover.Id, "POST");
+        return HandleResult(await _coversService.CreateCoverAsync(cover));
     }
 
     [HttpDelete("{id}")]
-    public async Task DeleteAsync(string id)
+    public async Task<IActionResult> DeleteAsync(string id)
     {
-        await _coversService.DeleteCoverByIdAsync(id);
-        //await _auditer.AuditCover(cover.Id, "DELETE");
+        return HandleResult(await _coversService.DeleteCoverByIdAsync(id));
     }
 
     [HttpGet("{id}")]
-    public async Task<Cover> GetAsync(string id)
+    public async Task<IActionResult> GetAsync(string id)
     {
-        return await _coversService.GetCoverByIdAsync(id);
+        return HandleResult(await _coversService.GetCoverByIdAsync(id));
     }
 
     [HttpGet]
-    public async Task<IEnumerable<Cover>> GetAsync()
+    public async Task<IActionResult> GetAsync()
     {
-        return await _coversService.GetAllCoversAsync();
+        return HandleResult(await _coversService.GetAllCoversAsync());
     }
+
     //[HttpPost("{startDate}/{endDate}/{coverType}")]
     //public async Task<ActionResult> ComputePremiumAsync(DateOnly startDate, DateOnly endDate, CoverType coverType)
     //{
-    //    return Ok(ComputePremium(startDate, endDate, coverType));
+    //    return Ok(_coversService.ComputePremium(startDate, endDate, coverType));
     //}
 }
