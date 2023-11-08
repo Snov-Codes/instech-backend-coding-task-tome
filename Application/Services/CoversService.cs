@@ -38,38 +38,57 @@ namespace Application.Services
             return await _coversRepository.GetItemsAsync();
         }
 
-        private decimal ComputePremium(DateOnly startDate, DateOnly endDate, CoverType coverType)
+        public decimal ComputePremium(DateOnly startDate, DateOnly endDate, CoverType coverType)
         {
-            var multiplier = 1.3m;
-            if (coverType == CoverType.Yacht)
-            {
-                multiplier = 1.1m;
-            }
-
-            if (coverType == CoverType.PassengerShip)
-            {
-                multiplier = 1.2m;
-            }
-
-            if (coverType == CoverType.Tanker)
-            {
-                multiplier = 1.5m;
-            }
-
-            var premiumPerDay = 1250 * multiplier;
-            var insuranceLength = endDate.DayNumber - startDate.DayNumber;
-            var totalPremium = 0m;
+            decimal baseRate = 1250m;
+            decimal multiplier = GetMultiplierForCoverType(coverType);
+            decimal premiumPerDay = baseRate * multiplier;
+            int insuranceLength = endDate.DayNumber - startDate.DayNumber + 1; // Found off by one bug here
+            decimal totalPremium = 0m;
 
             for (var i = 0; i < insuranceLength; i++)
             {
-                if (i < 30) totalPremium += premiumPerDay;
-                if (i < 180 && coverType == CoverType.Yacht) totalPremium += premiumPerDay - premiumPerDay * 0.05m;
-                else if (i < 180) totalPremium += premiumPerDay - premiumPerDay * 0.02m;
-                if (i < 365 && coverType != CoverType.Yacht) totalPremium += premiumPerDay - premiumPerDay * 0.03m;
-                else if (i < 365) totalPremium += premiumPerDay - premiumPerDay * 0.08m;
+                decimal discount = CalculateDiscount(i, coverType);
+                totalPremium += ApplyDiscount(premiumPerDay, discount);
             }
 
             return totalPremium;
+        }
+
+        private decimal GetMultiplierForCoverType(CoverType coverType)
+        {
+            switch (coverType)
+            {
+                case CoverType.Yacht:
+                    return 1.1m;
+                case CoverType.PassengerShip:
+                    return 1.2m;
+                case CoverType.Tanker:
+                    return 1.5m;
+                default:
+                    return 1.3m;
+            }
+        }
+
+        private decimal CalculateDiscount(int day, CoverType coverType)
+        {
+            if (day < 30)
+            {
+                return 0m;
+            }
+            else if (day < 180)
+            {
+                return (coverType == CoverType.Yacht) ? 0.05m : 0.02m;
+            }
+            else
+            {
+                return (coverType == CoverType.Yacht) ? 0.08m : 0.03m;
+            }
+        }
+
+        private decimal ApplyDiscount(decimal premiumPerDay, decimal discount)
+        {
+            return premiumPerDay - (premiumPerDay * discount);
         }
     }
 }

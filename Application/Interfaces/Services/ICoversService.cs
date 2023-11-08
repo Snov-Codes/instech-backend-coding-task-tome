@@ -8,5 +8,6 @@ namespace Application.Interfaces.Services
         Task DeleteCoverByIdAsync(string id);
         Task<Cover> GetCoverByIdAsync(string id);
         Task<IEnumerable<Cover>> GetAllCoversAsync();
+        decimal ComputePremium(DateOnly startDate, DateOnly endDate, CoverType coverType);
     }
 }

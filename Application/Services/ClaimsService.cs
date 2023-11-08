@@ -8,17 +8,23 @@ namespace Application.Services
     {
         private readonly IClaimsRepository _claimsRepository;
         private readonly IAuditsRepository _auditsRepository;
+        private readonly ICoversRepository _coversRepository;
 
-        public ClaimsService(IClaimsRepository claimsRepository, IAuditsRepository auditsRepository)
+        public ClaimsService(IClaimsRepository claimsRepository, IAuditsRepository auditsRepository, ICoversRepository coversRepository)
         {
             _claimsRepository = claimsRepository;
             _auditsRepository = auditsRepository;
+            _coversRepository = coversRepository;
         }
 
         public async Task CreateClaimAsync(Claim claim)
         {
-            await _claimsRepository.AddItemAsync(claim);
-            await _auditsRepository.AuditClaimAsync(claim.Id, "POST");
+            var cover = await _coversRepository.GetItemAsync(claim.CoverId);
+            if (cover is not null)
+            {
+                await _claimsRepository.AddItemAsync(claim);
+                await _auditsRepository.AuditClaimAsync(claim.Id, "POST");
+            }
         }
 
         public async Task DeleteClaimByIdAsync(string id)
