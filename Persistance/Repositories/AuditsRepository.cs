@@ -23,7 +23,7 @@ namespace Persistance.Repositories
             };
 
             _dbContext.Add(claimAudit);
-            _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task AuditCoverAsync(string id, string httpRequestType)
@@ -36,7 +36,7 @@ namespace Persistance.Repositories
             };
 
             _dbContext.Add(coverAudit);
-            _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
         }
     }
 }
