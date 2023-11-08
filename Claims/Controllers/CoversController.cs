@@ -39,7 +39,7 @@ public class CoversController : BaseController
     }
 
     [HttpPost("{startDate}/{endDate}/{coverType}")]
-    public ActionResult ComputePremiumAsync(DateOnly startDate, DateOnly endDate, CoverType coverType)
+    public ActionResult ComputePremium(DateOnly startDate, DateOnly endDate, CoverType coverType)
     {
         return Ok(_coversService.ComputePremium(startDate, endDate, coverType));
     }
