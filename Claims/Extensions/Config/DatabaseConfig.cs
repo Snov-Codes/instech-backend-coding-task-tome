@@ -1,7 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Application.Interfaces.Repositories;
 using Persistance.AppSettings;
-using Persistance.DataAccess;
-using Persistance.Interfaces;
 using Persistance.Repositories;
 
 namespace Claims.Extensions.Config

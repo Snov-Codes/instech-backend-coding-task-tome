@@ -1,4 +1,4 @@
-﻿namespace Persistance.Interfaces
+﻿namespace Application.Interfaces.Repositories
 {
     public interface IAuditsRepository
     {

@@ -1,7 +1,7 @@
 ﻿using Application.Core;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Entities;
-using Persistance.Interfaces;
 
 namespace Application.Services
 {
@@ -26,9 +26,9 @@ namespace Application.Services
 
             var dateOnly = DateOnly.FromDateTime(claim.Created);
 
-            if(dateOnly < cover.StartDate || dateOnly > cover.EndDate)
+            if (dateOnly < cover.StartDate || dateOnly > cover.EndDate)
                 return Result<Claim>.Failure("Claim creation date must be within the Cover start and end dates!");
-            if(claim.DamageCost > 100000)
+            if (claim.DamageCost > 100000)
                 return Result<Claim>.Failure("The damage cost of the Claim cannot exceed 100.000!");
 
             await _claimsRepository.AddItemAsync(claim);

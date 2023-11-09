@@ -1,7 +1,7 @@
 ﻿using Application.Core;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Entities;
-using Persistance.Interfaces;
 
 namespace Application.Services
 {

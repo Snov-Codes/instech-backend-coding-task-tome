@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 
-namespace Persistance.Interfaces
+namespace Application.Interfaces.Repositories
 {
     public interface ICoversRepository : ICosmosDbRepository<Cover>
     {

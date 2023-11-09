@@ -1,7 +1,7 @@
-﻿using Application.Services;
+﻿using Application.Interfaces.Repositories;
+using Application.Services;
 using Domain.Entities;
 using Moq;
-using Persistance.Interfaces;
 using Xunit;
 
 namespace Claims.Tests

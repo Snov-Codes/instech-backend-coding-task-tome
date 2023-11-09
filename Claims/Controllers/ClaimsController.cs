@@ -16,6 +16,11 @@ namespace Claims.Controllers
             _claimsService = claimsService;
         }
 
+        /// <summary>
+        /// Creates a Claim.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns>A newly created Claim</returns>
         [HttpPost]
         public async Task<IActionResult> CreateAsync(Claim claim)
         {

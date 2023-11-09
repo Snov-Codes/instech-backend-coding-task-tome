@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.Interfaces.Repositories;
+using Domain.Entities;
 using Microsoft.Azure.Cosmos;
 using Persistance.Interfaces;
 

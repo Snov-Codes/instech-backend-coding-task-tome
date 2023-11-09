@@ -1,6 +1,6 @@
-﻿using Domain.Entities;
+﻿using Application.Interfaces.Repositories;
+using Domain.Entities;
 using Persistance.DataAccess;
-using Persistance.Interfaces;
 
 namespace Persistance.Repositories
 {
