@@ -32,7 +32,15 @@ namespace Application.Services
 
         public async Task<Result<Cover>> DeleteCoverByIdAsync(string id)
         {
-            await _coversRepository.DeleteItemAsync(id);
+            try
+            {
+                await _coversRepository.DeleteItemAsync(id);
+            }
+            catch(Exception ex)
+            {
+                return Result<Cover>.Failure(ex.Message);
+            }
+
             await _auditsRepository.AuditCoverAsync(id, "DELETE");
 
             return Result<Cover>.Success();
@@ -40,7 +48,12 @@ namespace Application.Services
 
         public async Task<Result<Cover>> GetCoverByIdAsync(string id)
         {
-            return Result<Cover>.Success(await _coversRepository.GetItemAsync(id));
+            var result = await _coversRepository.GetItemAsync(id);
+
+            if (result == null)
+                return Result<Cover>.NotFound();
+
+            return Result<Cover>.Success(result);
         }
 
         public async Task<Result<IEnumerable<Cover>>> GetAllCoversAsync()

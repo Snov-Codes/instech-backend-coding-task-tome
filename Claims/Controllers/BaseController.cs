@@ -1,5 +1,6 @@
 ﻿using Application.Core;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace Claims.Controllers
 {
@@ -9,6 +10,9 @@ namespace Claims.Controllers
     {
         protected ActionResult HandleResult<T>(Result<T> result)
         {
+            if(result.StatusCode == HttpStatusCode.NotFound)
+                return NotFound();
+
             if (result.IsSuccess && result.Value != null)
                 return Ok(result.Value);
 

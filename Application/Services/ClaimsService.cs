@@ -39,7 +39,15 @@ namespace Application.Services
 
         public async Task<Result<Claim>> DeleteClaimByIdAsync(string id)
         {
-            await _claimsRepository.DeleteItemAsync(id);
+            try
+            {
+                await _claimsRepository.DeleteItemAsync(id);
+            }
+            catch(Exception ex)
+            { 
+                return Result<Claim>.Failure(ex.Message);
+            }
+
             await _auditsRepository.AuditClaimAsync(id, "DELETE");
 
             return Result<Claim>.Success();
@@ -47,7 +55,11 @@ namespace Application.Services
 
         public async Task<Result<Claim>> GetClaimByIdAsync(string id)
         {
-            return Result<Claim>.Success(await _claimsRepository.GetItemAsync(id));
+            var result = await _claimsRepository.GetItemAsync(id);
+            if(result is null)
+                return Result<Claim>.NotFound();
+
+            return Result<Claim>.Success(result);
         }
 
         public async Task<Result<IEnumerable<Claim>>> GetAllClaimsAsync()
